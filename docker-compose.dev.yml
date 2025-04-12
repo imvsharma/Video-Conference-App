@@ -1,0 +1,58 @@
+volumes:
+  videoConferenceData:
+  videoConferencePgAdminData:
+
+networks:
+  videoConference_network:
+    driver: bridge
+services:
+  pgadmin:
+    image: ${PGADMIN_IMAGE_NAME}
+    container_name: ${PGADMIN_CONTAINER_NAME}
+    restart: always
+    ports:
+      - ${PGADMIN_HOST_PORT}:${PGADMIN_CONTAINER_PORT}
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PG_ADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PG_ADMIN_PASSWORD}
+    volumes:
+      - videoConferencePgAdminData:/var/lib/pgadmin
+    networks:
+      - videoConference_network
+    depends_on:
+      - user-db
+  user-db:
+    container_name: user-db
+    image: postgres:alpine3.19
+    hostname: user-db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=${USER_DB}
+      - POSTGRES_USER=${USER_DB_USER}
+      - POSTGRES_PASSWORD=${USER_DB_PASSWORD}
+    volumes:
+      - devcraft_pgdata:/var/lib/postgresql/data
+    networks:
+      - devcraftai_network
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${USER_DB_USER} -d ${USER_DB}' "]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  user-ms:
+    build:
+      context: ./microservices/user-ms/
+      dockerfile: Dockerfile
+    container_name: user-ms
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./microservices/user-ms:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - PORT=3000
+    depends_on:
+      - user-db
+    command: npm run dev
