@@ -64,3 +64,22 @@ services:
     depends_on:
       - user-db
     command: npm run dev
+  auth-ms:
+    build:
+      context: ./microservices/auth-ms/
+      dockerfile: Dockerfile
+    container_name: auth-ms
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./microservices/auth-ms:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - videoConference_network
+    environment:
+      - PORT=3001
+      - MICROSERVICE_NAME=AUTH_MS
+      - NODE_ENV=development
+      - USER_MS_API_URL=user-ms:3000
+      - SECRET=${JWT_SECRET}
+    command: npm run dev

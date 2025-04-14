@@ -6,7 +6,6 @@ export class UserRoutes extends Route{
 
   constructor () {
     super('/users')
-    console.log(this.userController)
   }
 
   setupRoutes(): void {

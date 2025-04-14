@@ -12,12 +12,39 @@ class UserController {
    * @param {any} next:NextFunction
    * @returns {any}
    */
-  getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getUsers = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     try {
+      const {query} = req
+      if(Object.keys(req.query).length > 0)  {
+        const { email, password } = query
+        let user = null
+        let errorMessage = null
+        if (email && typeof email === 'string') user = await User.findOne({ where: { email: email } })
+
+        if(!user) {
+          errorMessage = "Invalid Email Id"
+          return res.status(CONSTANT.STATUS_CODES.NOT_FOUND).json({error: errorMessage})
+           
+        } else {
+          if(password && typeof password === 'string') {
+            if(user && user.password) {
+              const isPasswordMatched = await User.isValidPassword(password, user?.password)
+              if (!isPasswordMatched) {
+                errorMessage = "Invalid Password"
+                return res.status(CONSTANT.STATUS_CODES.NOT_FOUND).json({error: errorMessage})
+              }
+            }
+            //return res.status(CONSTANT.STATUS_CODES.NOT_FOUND).json({error: errorMessage})
+            
+          }
+          return res.status(CONSTANT.STATUS_CODES.OK).json(user)
+        }
+      }
+      
       const users = await User.findAll()
-      res.status(CONSTANT.STATUS_CODES.OK).json(users)
+      return res.status(CONSTANT.STATUS_CODES.OK).json(users)
     } catch (error) {
-      res.status(CONSTANT.STATUS_CODES.INTERNAL_SERVER_ERROR).json({error: "Unable to fetch users"})
+      return res.status(CONSTANT.STATUS_CODES.INTERNAL_SERVER_ERROR).json({error: "Unable to fetch users"})
     }
   }
 
@@ -77,6 +104,7 @@ class UserController {
       res.status(CONSTANT.STATUS_CODES.INTERNAL_SERVER_ERROR).json({error: "Unable to delete user"})
     }
   }
+
 }
 
 
