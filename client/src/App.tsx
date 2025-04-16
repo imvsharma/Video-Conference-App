@@ -1,12 +1,19 @@
-import LoginFormComponent from "./module/auth/LoginForm/LoginForm"
-
+import { Outlet } from "react-router"
+import {Provider} from 'react-redux'
+import {store} from "./store/store"
 
  
 function App() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-svh">
-      <LoginFormComponent />
-    </div>
+    <>
+      <Provider store={store}>
+        <Outlet />
+      </Provider>
+      
+    </>
+    // <div className="flex flex-col items-center justify-center min-h-svh">
+    //   <LoginFormComponent />
+    // </div>
   )
 }
  

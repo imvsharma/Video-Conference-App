@@ -4,7 +4,7 @@ import express, { Application, json } from 'express';
 import config from './config/config';
 import sequelize from './config/database';
 import { UserRoutes } from './routes/user';
-import bodyParser from 'body-parser';
+import cors from 'cors'
 
 
 const PORT = config.port
@@ -23,6 +23,7 @@ class Express {
   }
 
   private async loadMiddlewares (app: Application): Promise <any> {
+    app.use(cors())
     app.use(json())
   }
 

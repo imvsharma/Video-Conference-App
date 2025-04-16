@@ -16,8 +16,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { userLogin } from "@/store/actions/auth.action";
+import {registeredUser} from "@/store/actions/auth.action";
 import { AppDispatch, RootState } from "@/store/store";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -25,43 +26,59 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { z } from "zod";
 
-
 const loginFormSchema = z.object({
+  name: z.string(),
   email: z.string().email(),
   password: z.string().min(5),
 });
 
-const LoginFormComponent = () => {
-  const {success, userInfo, userToken, error} = useSelector((state: RootState) => state.auth)
-  const dispatch: AppDispatch = useDispatch()
+const SignupForm = () => {
   const navigate = useNavigate()
+  const { loading, userInfo, error, success } = useSelector(
+    (state: RootState) => state.auth
+  )
+
+  const dispatch: AppDispatch = useDispatch()
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
   });
 
   const onSubmit = (values: z.infer<typeof loginFormSchema>) => {
-    console.log(values);
-    dispatch(userLogin(values))
+    dispatch(registeredUser(values))
   };
 
   useEffect(() => {
-    console.log(userInfo)
-    if (userInfo) navigate('/')
-  }, [navigate, userInfo])
+    if(success) navigate('/auth/login')
+  },[navigate, success])
 
   return (
     <Card className="w-lg">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader>
-            <CardTitle className=" text-3xl">Login</CardTitle>
-            <CardDescription>Login into app in one-click</CardDescription>
+            <CardTitle className=" text-3xl">Signup</CardTitle>
+            <CardDescription>Signup into app in one-click</CardDescription>
           </CardHeader>
           <CardContent className="my-10">
+          <FormField 
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="mt-5">
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Name" {...field} />
+                  </FormControl>
+                  
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField 
               control={form.control}
               name="email"
@@ -97,7 +114,7 @@ const LoginFormComponent = () => {
               Reset
             </Button>
             <Button className="ml-auto w-42" variant={"default"}>
-              Login
+              Signup
             </Button>
           </CardFooter>
         </form>
@@ -106,4 +123,4 @@ const LoginFormComponent = () => {
   );
 };
 
-export default LoginFormComponent;
+export default SignupForm;

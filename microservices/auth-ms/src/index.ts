@@ -5,6 +5,7 @@ import config from './config/config';
 import { AuthRoutes } from './routes/auth';
 import passport from 'passport';
 import authLocalStrategy from './Strategies/local.strategy';
+import cors from 'cors'
 
 const errorLogger = (err:any, req:Request, res:Response, next: NextFunction) => {
   // logs error to console and then passes to next middleware
@@ -29,6 +30,7 @@ class Express {
   }
 
   private async loadMiddlewares (app: Application): Promise <any> {
+    app.use(cors())
     app.use(json())
     //app.use(passport.initialize());
     passport.use(authLocalStrategy)
